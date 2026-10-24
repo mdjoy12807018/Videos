@@ -24,14 +24,12 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Create Fresh Flutter Project and Copy Code
+      - name: Create Fresh Flutter Project
         run: |
           flutter create . --org com.example.videoapp --project-name videos
 
-      - name: Add Dependencies Properly to pubspec.yaml
-        run: |
-          sed -i '/dependencies:/a \  firebase_core: ^2.27.0\n  firebase_auth: ^4.17.8\n  cloud_firestore: ^4.15.8\n  firebase_storage: ^11.6.9\n  file_picker: ^8.0.0\n  video_player: ^2.8.2' pubspec.yaml
-          flutter pub get
+      - name: Get Dependencies
+        run: flutter pub get
 
       - name: Build APK
         run: flutter build apk --release --target-platform android-arm64
