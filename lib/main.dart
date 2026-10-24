@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 
 void main() async {
@@ -15,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'My Videos App',
+      title: 'Videos Admin',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -24,25 +26,57 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class VideoHomeScreen extends StatelessWidget {
+class VideoHomeScreen extends StatefulWidget {
   const VideoHomeScreen({super.key});
 
-  // ফোন থেকে ভিডিও ফাইল সিলেক্ট করার ফাংশন
-  Future<void> _pickAndUploadVideo(BuildContext context) async {
+  @override
+  State<VideoHomeScreen> createState() => _VideoHomeScreenState();
+}
+
+class _VideoHomeScreenState extends State<VideoHomeScreen> {
+  bool _isUploading = false;
+
+  Future<void> _pickAndUploadVideo() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.video,
     );
 
-    if (result != null) {
-      String fileName = result.files.single.name;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Selected video: $fileName')),
-      );
-      // পরবর্তীতে এখানে ফায়ারবেসে ফাইল ট্রান্সফার লজিক যুক্ত হবে
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Video selection canceled')),
-      );
+    if (result != null && result.files.single.bytes != null) {
+      setState(() {
+        _isUploading = true;
+      });
+
+      try {
+        String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+        Reference ref = FirebaseStorage.instance.ref().child('videos/$fileName.mp4');
+        
+        UploadTask uploadTask = ref.putData(result.files.single.bytes!);
+        TaskSnapshot snapshot = await uploadTask;
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+
+        await FirebaseFirestore.instance.collection('videos').add({
+          'url': downloadUrl,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Video uploaded successfully!')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Upload failed: $e')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isUploading = false;
+          });
+        }
+      }
     }
   }
 
@@ -50,47 +84,16 @@ class VideoHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Videos - Admin'),
+        title: const Text('Video Admin Panel'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Welcome to Video Admin Panel',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () => _pickAndUploadVideo(context),
+      body: Center(
+        child: _isUploading
+            ? const CircularProgressIndicator()
+            : ElevatedButton.icon(
+                onPressed: _pickAndUploadVideo,
                 icon: const Icon(Icons.upload_file),
-                label: const Text('Upload New Video'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                ),
+                label: const Text('Upload Video'),
               ),
-            ),
-            const SizedBox(height: 30),
-            const Text(
-              'Uploaded Videos List:',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 0,
-                itemBuilder: (context, index) {
-                  return const ListTile(
-                    leading: Icon(Icons.video_library),
-                    title: Text('Sample Video Title'),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
