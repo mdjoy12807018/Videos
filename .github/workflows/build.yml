@@ -24,6 +24,10 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
+      - name: Create Clean Flutter Project
+        run: |
+          flutter create . --project-name videos --org com.example --platforms=android
+
       - name: Install dependencies
         run: flutter pub get
 
