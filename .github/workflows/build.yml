@@ -23,10 +23,15 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Install dependencies
-        run: flutter pub get
-        working-directory: .
+      - name: Locate Project Root and Install Dependencies
+        run: |
+          PROJECT_PATH=$(find . -name "pubspec.yaml" -exec dirname {} \;)
+          echo "Found project at: $PROJECT_PATH"
+          cd $PROJECT_PATH
+          flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
-        working-directory: .
+        run: |
+          PROJECT_PATH=$(find . -name "pubspec.yaml" -exec dirname {} \;)
+          cd $PROJECT_PATH
+          flutter build apk --release
