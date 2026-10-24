@@ -27,7 +27,7 @@ jobs:
       - name: Make Android Directory
         run: flutter create . --project-name videos --platforms=android
 
-      - name: Install dependencies
+      - name: Get Pub Dependencies
         run: flutter pub get
 
       - name: Build APK
