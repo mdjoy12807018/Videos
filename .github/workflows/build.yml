@@ -24,8 +24,19 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Find Project and Install Dependencies
+        run: |
+          PROJECT_DIR=$(find . -name "pubspec.yaml" -exec dirname {} \;)
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "Error: pubspec.yaml not found!"
+            exit 1
+          fi
+          echo "Found project directory: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
+          flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: |
+          PROJECT_DIR=$(find . -name "pubspec.yaml" -exec dirname {} \;)
+          cd "$PROJECT_DIR"
+          flutter build apk --release
