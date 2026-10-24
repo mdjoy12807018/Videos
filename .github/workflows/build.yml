@@ -27,6 +27,15 @@ jobs:
       - name: Create Fresh Flutter Project and Copy Code
         run: |
           flutter create . --org com.example.videoapp --project-name videos
+
+      - name: Add Dependencies to pubspec.yaml
+        run: |
+          echo "  firebase_core: ^2.27.0" >> pubspec.yaml
+          echo "  firebase_auth: ^4.17.8" >> pubspec.yaml
+          echo "  cloud_firestore: ^4.15.8" >> pubspec.yaml
+          echo "  firebase_storage: ^11.6.9" >> pubspec.yaml
+          echo "  file_picker: ^8.0.0" >> pubspec.yaml
+          echo "  video_player: ^2.8.2" >> pubspec.yaml
           flutter pub get
 
       - name: Build APK
