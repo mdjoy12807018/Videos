@@ -24,10 +24,6 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Create Fresh Flutter Project
-        run: |
-          flutter create . --org com.example.videoapp --project-name videos
-
       - name: Get Dependencies
         run: flutter pub get
 
