@@ -24,10 +24,7 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Make Android Directory
-        run: flutter create . --project-name videos --platforms=android
-
-      - name: Get Pub Dependencies
+      - name: Install dependencies
         run: flutter pub get
 
       - name: Build APK
