@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:file_picker/file_picker.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -23,6 +27,25 @@ class MyApp extends StatelessWidget {
 class VideoHomeScreen extends StatelessWidget {
   const VideoHomeScreen({super.key});
 
+  // ফোন থেকে ভিডিও ফাইল সিলেক্ট করার ফাংশন
+  Future<void> _pickAndUploadVideo(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.video,
+    );
+
+    if (result != null) {
+      String fileName = result.files.single.name;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Selected video: $fileName')),
+      );
+      // পরবর্তীতে এখানে ফায়ারবেসে ফাইল ট্রান্সফার লজিক যুক্ত হবে
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Video selection canceled')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,11 +64,7 @@ class VideoHomeScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Center(
               child: ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Upload button clicked!')),
-                  );
-                },
+                onPressed: () => _pickAndUploadVideo(context),
                 icon: const Icon(Icons.upload_file),
                 label: const Text('Upload New Video'),
                 style: ElevatedButton.styleFrom(
