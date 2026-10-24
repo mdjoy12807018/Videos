@@ -8,7 +8,7 @@ import 'package:video_player/video_player.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp(); // ফায়ারবেস কনফিগারেশন ফাইল ছাড়া সাদা স্ক্রিন আটকানোর জন্য আপাতত এটি বন্ধ রাখা হলো
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
