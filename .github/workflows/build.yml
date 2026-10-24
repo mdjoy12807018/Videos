@@ -8,10 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: .
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,9 +23,6 @@ jobs:
         with:
           flutter-version: '3.19.0'
           channel: 'stable'
-
-      - name: Create Flutter Project Structure
-        run: flutter create . --org com.example --project-name videos
 
       - name: Install dependencies
         run: flutter pub get
