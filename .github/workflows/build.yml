@@ -24,9 +24,12 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Create Clean Flutter Project
+      - name: Prepare Flutter Project
         run: |
-          flutter create . --project-name videos --org com.example --platforms=android
+          mkdir temp_project
+          flutter create temp_project --project-name videos --org com.example
+          cp -r temp_project/* .
+          rm -rf temp_project
 
       - name: Install dependencies
         run: flutter pub get
