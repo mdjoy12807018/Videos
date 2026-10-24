@@ -28,7 +28,7 @@ jobs:
         run: flutter pub get
 
       - name: Make Android Directory
-        run: flutter create . --platforms=android
+        run: flutter create . --project-name videos --platforms=android
 
       - name: Build APK
         run: flutter build apk --release
