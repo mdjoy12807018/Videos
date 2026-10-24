@@ -11,28 +11,66 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Video App',
+      title: 'My Videos App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const HomeScreen(),
+      home: const VideoHomeScreen(),
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class VideoHomeScreen extends StatelessWidget {
+  const VideoHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Videos'),
+        title: const Text('My Videos - Admin'),
       ),
-      body: const Center(
-        child: Text(
-          'Welcome to My Video App!',
-          style: TextStyle(fontSize: 20),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Welcome to Video Admin Panel',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Upload button clicked!')),
+                  );
+                },
+                icon: const Icon(Icons.upload_file),
+                label: const Text('Upload New Video'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            const Text(
+              'Uploaded Videos List:',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: 0,
+                itemBuilder: (context, index) {
+                  return const ListTile(
+                    leading: Icon(Icons.video_library),
+                    title: Text('Sample Video Title'),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
