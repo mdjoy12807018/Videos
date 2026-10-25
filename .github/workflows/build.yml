@@ -24,20 +24,28 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Ultimate Permanent Fix and Build
+      - name: Ultimate Absolute Fix and Build
         run: |
-          # Clean existing android folder if corrupted and recreate fresh platform files
-          rm -rf android
-          flutter create . --platforms=android --org com.example.videos --project-name videos
+          # Ensure android platform directories exist without overwriting source code
+          mkdir -p android/app/src/main
 
-          # Ensure AndroidManifest.xml contains the required v2 embedding metadata
+          # Create AndroidManifest.xml directly with v2 embedding if missing
           MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
-          if [ -f "$MANIFEST_PATH" ]; then
+          if [ ! -f "$MANIFEST_PATH" ]; then
+            echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.videos">' > "$MANIFEST_PATH"
+            echo '    <application android:label="videos" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">' >> "$MANIFEST_PATH"
+            echo '        <meta-data android:name="flutterEmbedding" android:value="2" />' >> "$MANIFEST_PATH"
+            echo '    </application>' >> "$MANIFEST_PATH"
+            echo '</manifest>' >> "$MANIFEST_PATH"
+          else
             if ! grep -q "flutterEmbedding" "$MANIFEST_PATH"; then
               sed -i '/<application/a \        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" \/>' "$MANIFEST_PATH"
             fi
           fi
 
-          # Get dependencies and build release APK
+          # Clean lock file and fetch dependencies cleanly
+          rm -f pubspec.lock
           flutter pub get
+
+          # Build release APK successfully
           flutter build apk --release
