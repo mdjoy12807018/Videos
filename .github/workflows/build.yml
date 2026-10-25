@@ -24,27 +24,18 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Force Fix Android Embedding and Build
+      - name: Force Recreate and Build
         run: |
-          # Create AndroidManifest.xml with v2 embedding if it doesn't exist in the correct path
-          mkdir -p android/app/src/main
+          # Force create android platform files to permanently fix missing structure
+          flutter create . --platforms=android --org com.example.videos --project-name videos
           
-          # If AndroidManifest.xml exists anywhere, patch it, otherwise create a base one with v2 embedding
-          if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
-            if ! grep -q "flutterEmbedding" "android/app/src/main/AndroidManifest.xml"; then
-              sed -i '/<application/a \        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" \/>' "android/app/src/main/AndroidManifest.xml"
+          # Force inject v2 embedding
+          MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
+          if [ -f "$MANIFEST_PATH" ]; then
+            if ! grep -q "flutterEmbedding" "$MANIFEST_PATH"; then
+              sed -i '/<application/a \        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" \/>' "$MANIFEST_PATH"
             fi
-          else
-            echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.videos">' > android/app/src/main/AndroidManifest.xml
-            echo '    <application android:label="videos" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">' >> android/app/src/main/AndroidManifest.xml
-            echo '        <meta-data android:name="flutterEmbedding" android:value="2" />' >> android/app/src/main/AndroidManifest.xml
-            echo '    </application>' >> android/app/src/main/AndroidManifest.xml
-            echo '</manifest>' >> android/app/src/main/AndroidManifest.xml
           fi
 
-          # Clean lock file and get dependencies
-          rm -f pubspec.lock
-          flutter pub get || true
-
-          # Build APK
-          flutter build apk --release --no-pub
+          # Build APK directly
+          flutter build apk --release
