@@ -55,3 +55,4 @@ EOF
 
           # 3. Build release APK with robust fallback mechanisms to guarantee success
           flutter build apk --release --no-pub || flutter build apk --release
+ 
