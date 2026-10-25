@@ -24,22 +24,29 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Fresh Recreate and Build APK
+      - name: Manual Safe Setup and Build APK
         run: |
-          # Remove old corrupted android/ios folders if they exist
-          rm -rf android ios
-
-          # Create a completely fresh Flutter project structure keeping lib/ and pubspec.yaml safe
-          flutter create . --org com.example.videos --project-name videos
-
-          # Ensure v2 embedding metadata is present in AndroidManifest.xml
+          # Manually create the required Android directory structure without touching lib/ or pubspec.yaml
+          mkdir -p android/app/src/main
+          
           MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
-          if [ -f "$MANIFEST_PATH" ]; then
+          
+          # Create AndroidManifest.xml with v2 embedding if it doesn't exist
+          if [ ! -f "$MANIFEST_PATH" ]; then
+            echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.app">' > "$MANIFEST_PATH"
+            echo '    <application android:label="app" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">' >> "$MANIFEST_PATH"
+            echo '        <meta-data android:name="flutterEmbedding" android:value="2" />' >> "$MANIFEST_PATH"
+            echo '    </application>' >> "$MANIFEST_PATH"
+            echo '</manifest>' >> "$MANIFEST_PATH"
+          else
             if ! grep -q "flutterEmbedding" "$MANIFEST_PATH"; then
               sed -i '/<application/a \        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" \/>' "$MANIFEST_PATH"
             fi
           fi
 
-          # Get dependencies and build the release APK successfully
+          # Clean lock file to ensure fresh package resolution matching your pubspec.yaml
+          rm -f pubspec.lock
+          
+          # Get dependencies and build APK safely
           flutter pub get
           flutter build apk --release
