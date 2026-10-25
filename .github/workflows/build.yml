@@ -24,12 +24,14 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Force Recreate and Build
+      - name: Safe Ultimate Build Fix
         run: |
-          # Force create android platform files to permanently fix missing structure
-          flutter create . --platforms=android --org com.example.videos --project-name videos
-          
-          # Force inject v2 embedding
+          # Safely create android directory only if it completely misses, without touching lib/
+          if [ ! -d "android" ]; then
+            flutter create . --platforms=android --org com.example.videos --project-name videos
+          fi
+
+          # Ensure AndroidManifest.xml has v2 embedding metadata
           MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
           if [ -f "$MANIFEST_PATH" ]; then
             if ! grep -q "flutterEmbedding" "$MANIFEST_PATH"; then
@@ -37,5 +39,8 @@ jobs:
             fi
           fi
 
-          # Build APK directly
+          # Fetch all pubspec dependencies properly
+          flutter pub get
+
+          # Build release APK
           flutter build apk --release
