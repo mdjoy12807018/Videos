@@ -26,33 +26,20 @@ jobs:
 
       - name: Ultimate Safe Build and Fix
         run: |
-          # 1. Ensure android directory and AndroidManifest.xml exist securely without breaking lib/
           mkdir -p android/app/src/main
           MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
           
           if [ ! -f "$MANIFEST_PATH" ]; then
-            cat << 'EOF' > "$MANIFEST_PATH"
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.videos">
-    <application
-        android:label="videos"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
-        <meta-data
-            android:name="flutterEmbedding"
-            android:value="2" />
-    </application>
-</manifest>
-EOF
+            echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.videos">' > "$MANIFEST_PATH"
+            echo '    <application android:label="videos" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">' >> "$MANIFEST_PATH"
+            echo '        <meta-data android:name="flutterEmbedding" android:value="2" />' >> "$MANIFEST_PATH"
+            echo '    </application>' >> "$MANIFEST_PATH"
+            echo '</manifest>' >> "$MANIFEST_PATH"
           else
             if ! grep -q "flutterEmbedding" "$MANIFEST_PATH"; then
               sed -i '/<application/a \        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" \/>' "$MANIFEST_PATH"
             fi
           fi
 
-          # 2. Get dependencies safely while preserving pubspec structure
           flutter pub get
-
-          # 3. Build release APK with robust fallback mechanisms to guarantee success
           flutter build apk --release --no-pub || flutter build apk --release
- 
