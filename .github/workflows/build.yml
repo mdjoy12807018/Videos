@@ -24,29 +24,34 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Manual Safe Setup and Build APK
+      - name: Ultimate Safe Build and Fix
         run: |
-          # Manually create the required Android directory structure without touching lib/ or pubspec.yaml
+          # 1. Ensure android directory and AndroidManifest.xml exist securely without breaking lib/
           mkdir -p android/app/src/main
-          
           MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
           
-          # Create AndroidManifest.xml with v2 embedding if it doesn't exist
           if [ ! -f "$MANIFEST_PATH" ]; then
-            echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.app">' > "$MANIFEST_PATH"
-            echo '    <application android:label="app" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">' >> "$MANIFEST_PATH"
-            echo '        <meta-data android:name="flutterEmbedding" android:value="2" />' >> "$MANIFEST_PATH"
-            echo '    </application>' >> "$MANIFEST_PATH"
-            echo '</manifest>' >> "$MANIFEST_PATH"
+            cat << 'EOF' > "$MANIFEST_PATH"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.videos">
+    <application
+        android:label="videos"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+</manifest>
+EOF
           else
             if ! grep -q "flutterEmbedding" "$MANIFEST_PATH"; then
               sed -i '/<application/a \        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" \/>' "$MANIFEST_PATH"
             fi
           fi
 
-          # Clean lock file to ensure fresh package resolution matching your pubspec.yaml
-          rm -f pubspec.lock
-          
-          # Get dependencies and build APK safely
+          # 2. Get dependencies safely while preserving pubspec structure
           flutter pub get
-          flutter build apk --release
+
+          # 3. Build release APK with robust fallback mechanisms to guarantee success
+          flutter build apk --release --no-pub || flutter build apk --release
