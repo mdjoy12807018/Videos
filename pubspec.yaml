@@ -1,33 +1,24 @@
-name: Build APK
+name: videos
+description: "A new Flutter project."
+publish_to: 'none'
 
-on:
-  push:
-    branches: [ "main" ]
+version: 1.0.0+1
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+environment:
+  sdk: '>=3.0.0 <4.0.0'
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  firebase_core: ^2.24.2
+  firebase_storage: ^11.6.0
+  file_picker: ^8.0.0
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.19.0'
-          channel: 'stable'
-
-      - name: Clean Lock and Get Dependencies
-        run: |
-          rm -f pubspec.lock
-          flutter pub get
-
-      - name: Build APK
-        run: flutter build apk --release --no-pub
+flutter:
+  uses-material-design: true
