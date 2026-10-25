@@ -24,8 +24,15 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Get Dependencies
-        run: flutter pub get --no-example
+      - name: Auto-Fix Android Embedding and Get Dependencies
+        run: |
+          MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
+          if [ -f "$MANIFEST_PATH" ]; then
+            if ! grep -q "flutterEmbedding" "$MANIFEST_PATH"; then
+              sed -i '/<application/a \        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" \/>' "$MANIFEST_PATH"
+            fi
+          fi
+          flutter pub get --no-example
 
       - name: Build APK
         run: flutter build apk --release --no-pub --no-android-migration
