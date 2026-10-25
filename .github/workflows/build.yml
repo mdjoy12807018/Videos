@@ -24,32 +24,21 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Ultimate Foolproof Auto-Fix and Build
+      - name: Generate Platform and Build APK
         run: |
-          # 1. Ensure android manifest has v2 embedding
-          mkdir -p android/app/src/main
+          # Check if android folder exists, if not or broken, generate it cleanly using flutter create
+          if [ ! -d "android" ] || [ ! -f "android/app/src/main/AndroidManifest.xml" ]; then
+            flutter create . --platforms=android --org com.example.videos --project-name videos
+          fi
+
+          # Force inject v2 embedding metadata to ensure no migration error
           MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
-          
-          if [ ! -f "$MANIFEST_PATH" ]; then
-            echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.videos">' > "$MANIFEST_PATH"
-            echo '    <application android:label="videos" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">' >> "$MANIFEST_PATH"
-            echo '        <meta-data android:name="flutterEmbedding" android:value="2" />' >> "$MANIFEST_PATH"
-            echo '    </application>' >> "$MANIFEST_PATH"
-            echo '</manifest>' >> "$MANIFEST_PATH"
-          else
+          if [ -f "$MANIFEST_PATH" ]; then
             if ! grep -q "flutterEmbedding" "$MANIFEST_PATH"; then
               sed -i '/<application/a \        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" \/>' "$MANIFEST_PATH"
             fi
           fi
 
-          # 2. Bypass strict version locks and force dependency resolution without failing
-          rm -f pubspec.lock
-          flutter pub get || true
-
-          # 3. Force override any potential migration checks during build
-          flutter build apk --release --no-pub || flutter build apk --release --no-pub --no-android-migration || true
-          
-          # 4. Fallback build command to guarantee APK output
-          if [ ! -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
-            flutter build apk --release
-          fi
+          # Get dependencies and build release APK safely
+          flutter pub get
+          flutter build apk --release
