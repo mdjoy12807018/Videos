@@ -24,8 +24,8 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Install Dependencies
-        run: flutter pub get
+      - name: Get Dependencies
+        run: flutter pub get --no-example
 
       - name: Build APK
-        run: flutter build apk --release --no-pub
+        run: flutter build apk --release --no-pub --no-android-migration
