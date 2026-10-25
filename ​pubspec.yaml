@@ -1,6 +1,7 @@
 name: videos
 description: "A new Flutter project."
-publish_to: "none"
+publish_to: 'none'
+
 version: 1.0.0+1
 
 environment:
@@ -11,7 +12,6 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
   firebase_core: ^2.24.2
-  cloud_firestore: ^4.14.0
   firebase_storage: ^11.6.0
   file_picker: ^8.0.0
 
@@ -22,4 +22,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
- 
