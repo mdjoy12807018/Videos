@@ -1,21 +1,30 @@
-name: videos
-description: "A new Flutter project."
-publish_to: 'none'
+name: Build APK
 
-version: 1.0.0+1
+on:
+  push:
+    branches: [ "main" ]
 
-environment:
-  sdk: '>=3.0.0 <4.0.0'
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-dependencies:
-  flutter:
-    sdk: flutter
-  cupertino_icons: ^1.0.6
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.0
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-flutter:
-  uses-material-design: true
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+
+      - name: Build Clean APK
+        run: |
+          flutter pub get
+          flutter build apk --release
