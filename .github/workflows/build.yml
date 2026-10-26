@@ -24,20 +24,25 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Generate Android and Build APK
+      - name: Step 1 - Setup Android Platform Safely
         run: |
-          # Clean old or broken android folder and generate fresh platform files safely
-          rm -rf android
-          flutter create . --platforms=android --org com.example.videos --project-name videos
-
-          # Ensure v2 embedding metadata is correctly placed in AndroidManifest.xml
+          mkdir -p android/app/src/main
           MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
-          if [ -f "$MANIFEST_PATH" ]; then
+          
+          if [ ! -f "$MANIFEST_PATH" ]; then
+            echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.videos">' > "$MANIFEST_PATH"
+            echo '    <application android:label="videos" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">' >> "$MANIFEST_PATH"
+            echo '        <meta-data android:name="flutterEmbedding" android:value="2" />' >> "$MANIFEST_PATH"
+            echo '    </application>' >> "$MANIFEST_PATH"
+            echo '</manifest>' >> "$MANIFEST_PATH"
+          else
             if ! grep -q "flutterEmbedding" "$MANIFEST_PATH"; then
               sed -i '/<application/a \        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" \/>' "$MANIFEST_PATH"
             fi
           fi
 
-          # Get dependencies and build release APK successfully
-          flutter pub get
-          flutter build apk --release
+      - name: Step 2 - Get Dependencies
+        run: flutter pub get
+
+      - name: Step 3 - Build Release APK
+        run: flutter build apk --release
