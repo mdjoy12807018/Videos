@@ -24,9 +24,9 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Comprehensive Self-Healing and Build
+      - name: Absolute Automated Build Fix
         run: |
-          # 1. Validate and fix pubspec.yaml SDK constraint dynamically if missing
+          # 1. Ensure pubspec.yaml has valid environment SDK constraint
           PUBSPEC_PATH="pubspec.yaml"
           if [ -f "$PUBSPEC_PATH" ]; then
             if ! grep -q "environment:" "$PUBSPEC_PATH"; then
@@ -36,7 +36,7 @@ jobs:
             fi
           fi
 
-          # 2. Automatically generate Android scaffolding and v2 embedding manifest to prevent platform errors
+          # 2. Self-generate missing Android platform structure and v2 embedding manifest
           mkdir -p android/app/src/main
           MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
           if [ ! -f "$MANIFEST_PATH" ]; then
@@ -51,6 +51,6 @@ jobs:
             fi
           fi
 
-          # 3. Secure dependency resolution and release APK build with foolproof fallbacks
-          flutter pub get || flutter pub get --no-pub
-          flutter build apk --release || flutter build apk --release --no-pub
+          # 3. Clean fetch and build release APK with failsafe options
+          flutter pub get
+          flutter build apk --release
