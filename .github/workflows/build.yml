@@ -24,25 +24,8 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Step 1 - Setup Android Platform Safely
+      - name: Build Clean APK
         run: |
-          mkdir -p android/app/src/main
-          MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
-          
-          if [ ! -f "$MANIFEST_PATH" ]; then
-            echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.videos">' > "$MANIFEST_PATH"
-            echo '    <application android:label="videos" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">' >> "$MANIFEST_PATH"
-            echo '        <meta-data android:name="flutterEmbedding" android:value="2" />' >> "$MANIFEST_PATH"
-            echo '    </application>' >> "$MANIFEST_PATH"
-            echo '</manifest>' >> "$MANIFEST_PATH"
-          else
-            if ! grep -q "flutterEmbedding" "$MANIFEST_PATH"; then
-              sed -i '/<application/a \        <meta-data\n            android:name=\"flutterEmbedding\"\n            android:value=\"2\" \/>' "$MANIFEST_PATH"
-            fi
-          fi
-
-      - name: Step 2 - Get Dependencies
-        run: flutter pub get
-
-      - name: Step 3 - Build Release APK
-        run: flutter build apk --release
+          flutter pub get
+          flutter build apk --release
+l
